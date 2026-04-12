@@ -1,6 +1,6 @@
 # daily_water_tracker
 
-A new Flutter project.
+A Flutter project for a daily water intake/hydration tracker to track users' daily water consumption and send alerts when daily is not it.
 
 ## Getting Started
 
