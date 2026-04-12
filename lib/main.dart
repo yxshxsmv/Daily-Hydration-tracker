@@ -23,34 +23,50 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return MaterialApp(
+    return FutureBuilder(
+      future: SharedPreferences.getInstance(),
+      builder: (context, snapshot) {
 
-      debugShowCheckedModeBanner: false,
+        if (!snapshot.hasData) {
+          return const SizedBox();
+        }
 
-      home: FutureBuilder(
+        final prefs = snapshot.data!;
+        bool darkMode = prefs.getBool("darkMode") ?? false;
 
-        future: goalExists(),
+        return MaterialApp(
 
-        builder: (context, snapshot) {
+          debugShowCheckedModeBanner: false,
 
-          if (!snapshot.hasData) {
-            return Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          }
+          theme: ThemeData.light(),
 
-          if (snapshot.data == true) {
-            return HomeScreen();
-          }
+          darkTheme: ThemeData.dark(),
 
-          return GoalScreen();
+          themeMode:
+          darkMode ? ThemeMode.dark : ThemeMode.light,
 
-        },
+          home: FutureBuilder(
+            future: goalExists(),
+            builder: (context, snapshot) {
 
-      ),
+              if (!snapshot.hasData) {
+                return const Scaffold(
+                  body: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
 
+              if (snapshot.data == true) {
+                return const HomeScreen();
+              }
+
+              return GoalScreen();
+
+            },
+          ),
+        );
+      },
     );
 
   }

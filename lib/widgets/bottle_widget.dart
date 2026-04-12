@@ -61,22 +61,15 @@ class _BottleWidgetState extends State<BottleWidget>
         alignment: Alignment.center,
         children: [
 
-          Container(
-            width: 120,
-            height: 300,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30),
-              border: Border.all(
-                color: Colors.blue,
-                width: 3,
-              ),
-            ),
+          CustomPaint(
+            size: const Size(160, 300),
+            painter: BottleOutlinePainter(),
           ),
 
-          ClipRRect(
-            borderRadius: BorderRadius.circular(30),
+          ClipPath(
+            clipper: BottleClipper(),
             child: SizedBox(
-              width: 120,
+              width: 160,
               height: 300,
               child: TweenAnimationBuilder<double>(
                 tween: Tween(end: animatedProgress),
@@ -115,7 +108,11 @@ class _BottleWidgetState extends State<BottleWidget>
                 ),
               ),
 
-              Text("${widget.consumed} ml / ${widget.goal} ml"),
+              FittedBox(
+                child: Text(
+                  "${widget.consumed} ml / ${widget.goal} ml",
+                ),
+              )
 
             ],
           )
@@ -167,4 +164,101 @@ class WavePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(WavePainter oldDelegate) => true;
+}
+
+class BottleOutlinePainter extends CustomPainter {
+
+  @override
+  void paint(Canvas canvas, Size size) {
+
+    final paint = Paint()
+      ..color = Colors.blue
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3;
+
+    final path = Path();
+
+    double center = size.width / 2;
+    double neckWidth = size.width * 0.45;
+    double bodyTop = size.height * 0.22;
+
+    path.moveTo(size.width * 0.18, size.height);
+
+    path.quadraticBezierTo(
+      size.width * 0.02,
+      size.height * 0.65,
+      size.width * 0.28,
+      bodyTop,
+    );
+
+    path.lineTo(center - neckWidth / 2, bodyTop);
+
+    path.lineTo(center - neckWidth / 2, size.height * 0.05);
+
+    path.lineTo(center + neckWidth / 2, size.height * 0.05);
+
+    path.lineTo(center + neckWidth / 2, bodyTop);
+
+    path.lineTo(size.width * 0.72, bodyTop);
+
+    path.quadraticBezierTo(
+      size.width * 0.98,
+      size.height * 0.65,
+      size.width * 0.82,
+      size.height,
+    );
+
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+class BottleClipper extends CustomClipper<Path> {
+
+  @override
+  Path getClip(Size size) {
+
+    final path = Path();
+
+    double center = size.width / 2;
+    double neckWidth = size.width * 0.45;
+    double bodyTop = size.height * 0.22;
+
+    path.moveTo(size.width * 0.18, size.height);
+
+    path.quadraticBezierTo(
+      size.width * 0.02,
+      size.height * 0.65,
+      size.width * 0.28,
+      bodyTop,
+    );
+
+    path.lineTo(center - neckWidth / 2, bodyTop);
+
+    path.lineTo(center - neckWidth / 2, size.height * 0.05);
+
+    path.lineTo(center + neckWidth / 2, size.height * 0.05);
+
+    path.lineTo(center + neckWidth / 2, bodyTop);
+
+    path.lineTo(size.width * 0.72, bodyTop);
+
+    path.quadraticBezierTo(
+      size.width * 0.98,
+      size.height * 0.65,
+      size.width * 0.82,
+      size.height,
+    );
+
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

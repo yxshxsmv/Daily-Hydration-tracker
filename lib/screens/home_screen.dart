@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import '../widgets/bottle_widget.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -63,14 +64,35 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Daily Water Tracker"),
+        title: const Text(
+          "Hydration Tracker",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 26,
+            letterSpacing: 0.5,
+          ),
+        ),
+        centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
-            onPressed: () {},
-          )
+            onPressed: () async {
+
+              final updated = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SettingsScreen(),
+                ),
+              );
+
+              if (updated == true) {
+                loadSavedData();
+              }
+
+            },
+          ),
         ],
       ),
 
@@ -104,15 +126,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
 
-        const SizedBox(height: 20),
+        const SizedBox(height: 28),
 
         progressBar(progress),
 
-        const SizedBox(height: 20),
+        const SizedBox(height: 28),
 
         remainingCard(),
 
-        const SizedBox(height: 20),
+        const SizedBox(height: 28),
 
         intakeButtons(),
       ],
@@ -158,24 +180,41 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget progressBar(double progress) {
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
 
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
 
-            const Text("Daily Progress"),
+            const Text(
+              "Daily Progress",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
 
-            Text("${(progress * 100).toInt()}%"),
+            Text(
+              "${(progress * 100).toInt()}%",
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
 
           ],
         ),
 
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
 
-        LinearProgressIndicator(
-          value: progress,
-          minHeight: 12,
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: LinearProgressIndicator(
+            value: progress,
+            minHeight: 14,
+            backgroundColor: Colors.grey.shade200,
+            color: Colors.blue.shade400,
+          ),
         ),
 
       ],
@@ -187,20 +226,37 @@ class _HomeScreenState extends State<HomeScreen> {
     int remaining = goal - consumed;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.blue.shade100,
-        borderRadius: BorderRadius.circular(15),
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          )
+        ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
-          const Text("Remaining"),
+          const Text(
+            "Remaining",
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.black54,
+            ),
+          ),
+
+          const SizedBox(height: 6),
 
           Text(
             "$remaining ml",
             style: const TextStyle(
-              fontSize: 28,
+              fontSize: 36,
               fontWeight: FontWeight.bold,
             ),
           )
@@ -213,30 +269,53 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget intakeButtons() {
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
 
-        ElevatedButton(
-          onPressed: () => addWater(250),
-          child: const Text("+250ml"),
-        ),
-
-        ElevatedButton(
-          onPressed: () => addWater(500),
-          child: const Text("+500ml"),
-        ),
-
-        ElevatedButton(
-          onPressed: () => addWater(1000),
-          child: const Text("+1L"),
-        ),
-
-        ElevatedButton(
-          onPressed: resetWater,
-          child: const Text("Reset"),
-        ),
+        intakeButton("+250ml", () => addWater(250)),
+        intakeButton("+500ml", () => addWater(500)),
+        intakeButton("+1L", () => addWater(1000)),
+        intakeButton("Reset", resetWater, isReset: true),
 
       ],
+    );
+  }
+
+  Widget intakeButton(
+      String label,
+      VoidCallback onTap,
+      {bool isReset = false}
+      ) {
+
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: GestureDetector(
+          onTap: onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            height: 55,
+            decoration: BoxDecoration(
+              color: isReset
+                  ? Colors.red.shade100
+                  : Colors.blue.shade400,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Center(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: isReset
+                      ? Colors.red.shade700
+                      : Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
