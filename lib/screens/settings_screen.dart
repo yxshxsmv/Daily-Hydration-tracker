@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'login_screen.dart';
+
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -45,6 +47,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
 
     Navigator.pop(context, true);
+  }
+
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('loggedIn', false);
+
+    if (!mounted) {
+      return;
+    }
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
   }
 
   @override
@@ -151,6 +168,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onPressed: saveSettings,
                 icon: const Icon(Icons.check_circle_outline_rounded),
                 label: const Text('Save changes'),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: logout,
+                icon: const Icon(Icons.logout_rounded),
+                label: const Text('Log out'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(56),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
               ),
             ],
           ),

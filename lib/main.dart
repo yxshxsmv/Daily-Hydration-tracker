@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'screens/goal_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/login_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,7 +12,15 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  Future<bool> goalExists() async {
+  Future<bool> _shouldSkipLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final rememberMe = prefs.getBool('rememberMe') ?? false;
+    final loggedIn = prefs.getBool('loggedIn') ?? false;
+
+    return rememberMe && loggedIn;
+  }
+
+  Future<bool> _goalExists() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.containsKey('goal');
   }
@@ -130,7 +139,7 @@ class MyApp extends StatelessWidget {
           darkTheme: _buildTheme(Brightness.dark),
           themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
           home: FutureBuilder(
-            future: goalExists(),
+            future: _shouldSkipLogin(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Scaffold(
@@ -140,11 +149,28 @@ class MyApp extends StatelessWidget {
                 );
               }
 
-              if (snapshot.data == true) {
-                return const HomeScreen();
+              if (snapshot.data == false) {
+                return const LoginScreen();
               }
 
-              return const GoalScreen();
+              return FutureBuilder(
+                future: _goalExists(),
+                builder: (context, goalSnapshot) {
+                  if (!goalSnapshot.hasData) {
+                    return const Scaffold(
+                      body: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+
+                  if (goalSnapshot.data == true) {
+                    return const HomeScreen();
+                  }
+
+                  return const GoalScreen();
+                },
+              );
             },
           ),
         );
